@@ -1,0 +1,29 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  
+  header {
+    background: #0e4a7b;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+  }
+  
+  .controls {
+    margin: 1rem;
+    text-align: center;
+  }
+  
+  #map {
+    height: 100vh;
+    width: 90vw;
+  }
+  
+  #info {
+    margin: 1rem;
+    text-align: center;
+    font-weight: bold;
+  }
+  

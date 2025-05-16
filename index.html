@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Rutas - Metrovía</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+  <header>
+    <h1>Metrovía - Sistema de Gestión de Rutas</h1>
+  </header>
+
+  <section class="controls">
+    <label for="estacion">Selecciona una estación:</label>
+    <select id="estacion">
+      <option>Estación Guasmo Norte</option>
+      <option>Estación Río Daule</option>
+      <!-- Puedes añadir más estaciones -->
+    </select>
+  </section>
+
+  <div id="map" style="height: 100vh;"></div>
+
+  <section id="info">
+    <p>Tiempo estimado de llegada: <span id="tiempo">-</span> minutos</p>
+  </section>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
