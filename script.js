@@ -108,7 +108,7 @@ function agregarEstacionesTroncal3(map) { //todas las estaciones de la ruta de l
   // Función para cargar y mostrar ubicaciones de unidades dinámicamente
 
 function cargarUnidadesDesdeBackend(map) {
-  fetch('http://localhost:8081/ubicacion')
+  fetch('http://localhost:8080/ubicacion')
     .then(response => response.json())
     .then(data => {
       // Elimina marcadores antiguos
@@ -118,7 +118,7 @@ function cargarUnidadesDesdeBackend(map) {
       data.forEach(unidad => {
         const marker = L.marker([unidad.lat, unidad.lon], { icon: iconoUnidad })
           .addTo(map)
-          .bindPopup(`Unidad - Lat: ${unidad.lat}, Lon: ${unidad.lon}`);
+          .bindPopup(`${unidad.idUnidad}`);
         unidadesMarkers.push(marker);
       });
     })
@@ -135,7 +135,7 @@ function actualizarUnidades(map, unidades) {
   unidades.forEach(unidad => {
     const marker = L.marker([unidad.lat, unidad.lng], { icon: iconoUnidad })
       .addTo(map)
-      .bindPopup(`Unidad ID: ${unidad.id}`);
+      .bindPopup(`${unidad.id}`);
     unidadesMarkers.push(marker);
   });
 }
@@ -160,6 +160,7 @@ function actualizarUnidades(map, unidades) {
      // Actualizar unidades cada 10 segundos
     setInterval(() => {
     cargarUnidadesDesdeBackend(map);
+    actualizarUnidades(map);
     }, 10000);
 }
 
