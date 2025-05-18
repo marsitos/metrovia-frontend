@@ -1,11 +1,20 @@
-// Función para agregar las estaciones de la Troncal 3
 const iconoEstacion = L.icon({
     iconUrl: 'img/metrovia.png',
-    iconSize: [25, 25], // tamaño del ícono
+    iconSize: [32, 32], // tamaño del ícono
     iconAnchor: [16, 32], // punto del ícono que estará en la coordenada
     popupAnchor: [0, -32] // dónde aparecerá el popup respecto al ícono
   });
-function agregarEstacionesTroncal3(map) {
+const iconoUnidad = L.icon({
+  iconUrl: 'img/bus.png', // pon aquí la ruta correcta a la imagen de la unidad
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -32]
+});
+  let unidadesMarkers = [];
+
+
+// Función para agregar las estaciones de la Troncal 3
+function agregarEstacionesTroncal3(map) { //todas las estaciones de la ruta de la metrovia "Troncal 3"
     const estaciones = [
       { nombre: "Terminal MetroBastion", lat: -2.091617, lng: -79.942195 },
       { nombre: "Parque california", lat: -2.096153, lng: -79.936247 },
@@ -35,7 +44,7 @@ function agregarEstacionesTroncal3(map) {
       { nombre: "Biblioteca Municipal", lat: -2.1965202, lng: -79.8824468 },
       { nombre: "Garcia Aviles", lat: -2.1954969, lng: -79.8855598 },
     ];
-    const coordenadasApoyo =[
+    const coordenadasApoyo =[ //Estaciones + coordenadas de apoyo para que el mapa tenga coherencia en su ruta
       { nombre: "Terminal MetroBastion", lat: -2.091617, lng: -79.942195 },
       {lat: -2.091413, lng: -79.936911 },
       { nombre: "Parque california", lat: -2.096153, lng: -79.936247 },
@@ -86,8 +95,7 @@ function agregarEstacionesTroncal3(map) {
         .addTo(map)
         .bindPopup(`Estación: ${est.nombre}`);
     });
-    // const coordenadas = estaciones.map(est => [est.lat, est.lng]);
-    const ruta = L.polyline(coordenadasApoyo, {
+      const ruta = L.polyline(coordenadasApoyo, {
         color: 'blue',
         weight: 4,
         opacity: 0.7,
@@ -97,11 +105,43 @@ function agregarEstacionesTroncal3(map) {
       // Ajustar el mapa para que muestre toda la línea
       map.fitBounds(ruta.getBounds());
   }
-  
+  // Función para cargar y mostrar ubicaciones de unidades dinámicamente
+
+function cargarUnidadesDesdeBackend(map) {
+  fetch('http://localhost:8081/ubicacion')
+    .then(response => response.json())
+    .then(data => {
+      // Elimina marcadores antiguos
+      unidadesMarkers.forEach(marker => map.removeLayer(marker));
+      unidadesMarkers = [];
+
+      data.forEach(unidad => {
+        const marker = L.marker([unidad.lat, unidad.lon], { icon: iconoUnidad })
+          .addTo(map)
+          .bindPopup(`Unidad - Lat: ${unidad.lat}, Lon: ${unidad.lon}`);
+        unidadesMarkers.push(marker);
+      });
+    })
+    .catch(error => {
+      console.error('Error al obtener unidades:', error);
+    });
+}
+function actualizarUnidades(map, unidades) {
+  // Eliminar marcadores anteriores
+  unidadesMarkers.forEach(marker => map.removeLayer(marker));
+  unidadesMarkers = [];
+
+  // Agregar nuevos marcadores
+  unidades.forEach(unidad => {
+    const marker = L.marker([unidad.lat, unidad.lng], { icon: iconoUnidad })
+      .addTo(map)
+      .bindPopup(`Unidad ID: ${unidad.id}`);
+    unidadesMarkers.push(marker);
+  });
+}
   // Función para iniciar el mapa en coordenadas dadas
   function initMap(coords) {
     const map = L.map('map').setView(coords, 14); // Nivel de zoom 14 para mejor visibilidad
-  
     // Capa base del mapa
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
@@ -115,7 +155,14 @@ function agregarEstacionesTroncal3(map) {
   
     // Agregar estaciones de la Troncal 3
     agregarEstacionesTroncal3(map);
-  }
+      // Primera carga de unidades
+    cargarUnidadesDesdeBackend(map);
+     // Actualizar unidades cada 10 segundos
+    setInterval(() => {
+    cargarUnidadesDesdeBackend(map);
+    }, 10000);
+}
+
   
   // Verificar si el navegador permite geolocalización
   if (navigator.geolocation) {
@@ -133,4 +180,3 @@ function agregarEstacionesTroncal3(map) {
     alert("Tu navegador no soporta geolocalización.");
     initMap([-2.165, -79.89]);
   }
-  
