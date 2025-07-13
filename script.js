@@ -108,7 +108,7 @@ function agregarEstacionesTroncal3(map) { //todas las estaciones de la ruta de l
   // Función para cargar y mostrar ubicaciones de unidades dinámicamente
 
 function cargarUnidadesDesdeBackend(map) {
-  fetch('http://localhost:8080/ubicacion')
+  fetch('https://metrovia-backend.onrender.com/ubicacion')
     .then(response => response.json())
     .then(data => {
       // Elimina marcadores antiguos

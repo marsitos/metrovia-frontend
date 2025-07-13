@@ -1,66 +1,65 @@
-<!-- conductor.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Ubicación del Conductor</title>
+  <title>Ubicación Conductor Metrovía</title>
 </head>
 <body>
-  <h1>Seguimiento del Conductor</h1>
-  <p id="estado">Obteniendo ubicación...</p>
+  <h1>Conductor - Envío de ubicación</h1>
+  <p id="estado">Esperando ubicación...</p>
 
   <script>
-    const unidadId = 1; // Puedes cambiar esto dinámicamente si tienes varias unidades
-    const backendURL = 'http://localhost:8080/ubicacion'; // Cámbialo si ya está desplegado
+    const ID_UNIDAD = "unidad-1"; // Cambia esto según el bus
 
     function enviarUbicacion(lat, lon) {
-      fetch(backendURL, {
-        method: 'POST',
+      const datos = {
+        idUnidad: ID_UNIDAD,
+        lat: lat,
+        lon: lon
+      };
+
+      fetch("https://metrovia-backend.onrender.com/ubicacion", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          idUnidad: unidadId,
-          lat: lat,
-          lon: lon
-        })
+        body: JSON.stringify(datos)
       })
-      .then(response => response.text())
-      .then(data => {
-        console.log('Ubicación enviada:', data);
-        document.getElementById('estado').innerText = `Ubicación actual enviada: (${lat}, ${lon})`;
+      .then(response => {
+        if (response.ok) {
+          document.getElementById("estado").innerText = "Ubicación enviada ✔️";
+        } else {
+          document.getElementById("estado").innerText = "Error al enviar ubicación ❌";
+        }
       })
       .catch(error => {
-        console.error('Error al enviar la ubicación:', error);
-        document.getElementById('estado').innerText = `Error al enviar ubicación`;
+        document.getElementById("estado").innerText = "Error: " + error.message;
       });
     }
 
-    function obtenerUbicacion() {
+    function obtenerYEnviarUbicacion() {
       if (navigator.geolocation) {
-        navigator.geolocation.watchPosition(
+        navigator.geolocation.getCurrentPosition(
           position => {
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
+            document.getElementById("estado").innerText = `Enviando lat: ${lat}, lon: ${lon}`;
             enviarUbicacion(lat, lon);
           },
           error => {
-            console.error('Error al obtener ubicación:', error);
-            document.getElementById('estado').innerText = 'No se pudo obtener ubicación';
-          },
-          {
-            enableHighAccuracy: true,
-            maximumAge: 5000,
-            timeout: 10000
+            document.getElementById("estado").innerText = "No se pudo obtener ubicación 📍";
           }
         );
       } else {
-        document.getElementById('estado').innerText = 'Geolocalización no soportada por el navegador';
+        document.getElementById("estado").innerText = "Geolocalización no soportada";
       }
     }
 
-    // Iniciar
-    obtenerUbicacion();
+    // Enviar cada 10 segundos
+    setInterval(obtenerYEnviarUbicacion, 10000);
+
+    // Primer envío inmediato
+    obtenerYEnviarUbicacion();
   </script>
 </body>
 </html>

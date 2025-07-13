@@ -18,8 +18,8 @@ body {
   
   #map {
   width: 100vw;
-  height: calc(100vh - 60px); /* Por ejemplo, si tu cabecera mide 60px */
-  margin-top: 60px; /* misma altura */
+  height: calc(100vh - 60px);
+  margin-top: 60px;
 }
   
   #info {
