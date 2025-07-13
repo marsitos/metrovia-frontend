@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Ubicación Conductor Metrovía</title>
 </head>
 <body>
@@ -9,7 +9,14 @@
   <p id="estado">Esperando ubicación...</p>
 
   <script>
-    const ID_UNIDAD = "unidad-1"; // Cambia esto según el bus
+    // Obtener o crear un ID único para el conductor
+    let ID_UNIDAD = localStorage.getItem('idUnidad');
+    if (!ID_UNIDAD) {
+      ID_UNIDAD = 'unidad-' + Date.now(); // Ej: unidad-1689312345678
+      localStorage.setItem('idUnidad', ID_UNIDAD);
+    }
+
+    console.log('ID asignado:', ID_UNIDAD);
 
     function enviarUbicacion(lat, lon) {
       const datos = {
@@ -27,7 +34,7 @@
       })
       .then(response => {
         if (response.ok) {
-          document.getElementById("estado").innerText = "Ubicación enviada ✔️";
+          document.getElementById("estado").innerText = `Ubicación enviada ✔️ (ID: ${ID_UNIDAD})`;
         } else {
           document.getElementById("estado").innerText = "Error al enviar ubicación ❌";
         }
@@ -43,7 +50,7 @@
           position => {
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
-            document.getElementById("estado").innerText = `Enviando lat: ${lat}, lon: ${lon}`;
+            document.getElementById("estado").innerText = `Enviando lat: ${lat}, lon: ${lon} (ID: ${ID_UNIDAD})`;
             enviarUbicacion(lat, lon);
           },
           error => {
@@ -55,7 +62,7 @@
       }
     }
 
-    // Enviar cada 10 segundos
+    // Enviar ubicación cada 10 segundos
     setInterval(obtenerYEnviarUbicacion, 10000);
 
     // Primer envío inmediato
