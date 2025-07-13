@@ -111,34 +111,34 @@ function cargarUnidadesDesdeBackend(map) {
   fetch('https://metrovia-backend.onrender.com/ubicacion')
     .then(response => response.json())
     .then(data => {
-      // Elimina marcadores antiguos
-      unidadesMarkers.forEach(marker => map.removeLayer(marker));
-      unidadesMarkers = [];
-
-      data.forEach(unidad => {
-        const marker = L.marker([unidad.lat, unidad.lon], { icon: iconoUnidad })
-          .addTo(map)
-          .bindPopup(`${unidad.idUnidad}`);
-        unidadesMarkers.push(marker);
-      });
+      actualizarUnidades(map, data);
     })
     .catch(error => {
       console.error('Error al obtener unidades:', error);
     });
 }
-function actualizarUnidades(map, unidades) {
-  // Eliminar marcadores anteriores
+  function actualizarUnidades(map, unidades) {
+  if (!unidades || !Array.isArray(unidades)) {
+    console.warn('actualizarUnidades recibió un valor inválido:', unidades);
+    return;
+  }
+
+  // Eliminar marcadores viejos del mapa
   unidadesMarkers.forEach(marker => map.removeLayer(marker));
   unidadesMarkers = [];
 
   // Agregar nuevos marcadores
   unidades.forEach(unidad => {
-    const marker = L.marker([unidad.lat, unidad.lng], { icon: iconoUnidad })
-      .addTo(map)
-      .bindPopup(`${unidad.id}`);
-    unidadesMarkers.push(marker);
+    if (unidad.lat != null && unidad.lon != null) { // validación simple
+      const marker = L.marker([unidad.lat, unidad.lng], { icon: iconoUnidad })
+        .addTo(map)
+        .bindPopup(`${unidad.idUnidad}`);
+      unidadesMarkers.push(marker);
+    } else {
+      console.warn('Unidad con lat/lon inválidos:', unidad);
+    }
   });
-}
+  }
   // Función para iniciar el mapa en coordenadas dadas
   function initMap(coords) {
     const map = L.map('map').setView(coords, 14); // Nivel de zoom 14 para mejor visibilidad
