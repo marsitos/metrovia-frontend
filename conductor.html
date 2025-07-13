@@ -1,0 +1,66 @@
+<!-- conductor.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Ubicación del Conductor</title>
+</head>
+<body>
+  <h1>Seguimiento del Conductor</h1>
+  <p id="estado">Obteniendo ubicación...</p>
+
+  <script>
+    const unidadId = 1; // Puedes cambiar esto dinámicamente si tienes varias unidades
+    const backendURL = 'http://localhost:8080/ubicacion'; // Cámbialo si ya está desplegado
+
+    function enviarUbicacion(lat, lon) {
+      fetch(backendURL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          idUnidad: unidadId,
+          lat: lat,
+          lon: lon
+        })
+      })
+      .then(response => response.text())
+      .then(data => {
+        console.log('Ubicación enviada:', data);
+        document.getElementById('estado').innerText = `Ubicación actual enviada: (${lat}, ${lon})`;
+      })
+      .catch(error => {
+        console.error('Error al enviar la ubicación:', error);
+        document.getElementById('estado').innerText = `Error al enviar ubicación`;
+      });
+    }
+
+    function obtenerUbicacion() {
+      if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(
+          position => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            enviarUbicacion(lat, lon);
+          },
+          error => {
+            console.error('Error al obtener ubicación:', error);
+            document.getElementById('estado').innerText = 'No se pudo obtener ubicación';
+          },
+          {
+            enableHighAccuracy: true,
+            maximumAge: 5000,
+            timeout: 10000
+          }
+        );
+      } else {
+        document.getElementById('estado').innerText = 'Geolocalización no soportada por el navegador';
+      }
+    }
+
+    // Iniciar
+    obtenerUbicacion();
+  </script>
+</body>
+</html>
