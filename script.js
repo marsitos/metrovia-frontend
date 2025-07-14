@@ -11,11 +11,7 @@ const iconoUnidad = L.icon({
   popupAnchor: [0, -32]
 });
   let unidadesMarkers = [];
-
-
-// Función para agregar las estaciones de la Troncal 3
-function agregarEstacionesTroncal3(map) { //todas las estaciones de la ruta de la metrovia "Troncal 3"
-    const estaciones = [
+const estaciones = [
       { nombre: "Terminal MetroBastion", lat: -2.091617, lon: -79.942195 },
       { nombre: "Parque california", lat: -2.096153, lon: -79.936247 },
       { nombre: "Inmaconsa", lat: -2.104120361181248, lon:-79.93501554386026 },
@@ -44,6 +40,10 @@ function agregarEstacionesTroncal3(map) { //todas las estaciones de la ruta de l
       { nombre: "Biblioteca Municipal", lat: -2.1965202, lon: -79.8824468 },
       { nombre: "Garcia Aviles", lat: -2.1954969, lon: -79.8855598 },
     ];
+
+// Función para agregar las estaciones de la Troncal 3
+function agregarEstacionesTroncal3(map) { //todas las estaciones de la ruta de la metrovia "Troncal 3"
+
     const coordenadasApoyo =[ //Estaciones + coordenadas de apoyo para que el mapa tenga coherencia en su ruta
       { nombre: "Terminal MetroBastion", lat: -2.091617, lon: -79.942195 },
       {lat: -2.091413, lon: -79.936911 },
@@ -106,11 +106,71 @@ function agregarEstacionesTroncal3(map) { //todas las estaciones de la ruta de l
       map.fitBounds(ruta.getBounds());
   }
   // Función para cargar y mostrar ubicaciones de unidades dinámicamente
+function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Radio de la Tierra en km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
 
-function cargarUnidadesDesdeBackend(map) {
+function estimarTiempo(distanciaKm) {
+  const velocidadPromedioKmH = 25; // Aproximado para Metrovía
+  const tiempoHoras = distanciaKm / velocidadPromedioKmH;
+  return Math.round(tiempoHoras * 60); // En minutos
+}
+function actualizarTiempoEstimado() {
+  const select = document.getElementById("estacion");
+  const index = select.selectedIndex; // índice de la estación seleccionada
+  const coordsEstacion = estaciones[index]; // estaciones debe ser arreglo global
+
+  if (!coordsEstacion) return;
   fetch('https://metrovia-backend.onrender.com/ubicacion')
     .then(response => response.json())
+    .then(unidades => {
+      if (!unidades || unidades.length === 0) {
+        document.getElementById("tiempo").textContent = "-";
+        return;
+      }
+
+      const tiempos = unidades.map(unidad => {
+        // Asegúrate de acceder a lat, lon correctamente
+        const latUnidad = unidad.lat;
+        const lonUnidad = unidad.lon;
+
+        const distancia = calcularDistanciaKm(coordsEstacion.lat, coordsEstacion.lon, latUnidad, lonUnidad);
+        return estimarTiempo(distancia);
+      });
+
+      const tiempoMinimo = Math.min(...tiempos);
+      document.getElementById("tiempo").textContent = tiempoMinimo;
+    })
+    .catch(error => {
+      console.error("Error al obtener unidades:", error);
+      document.getElementById("tiempo").textContent = "-";
+    });
+}
+// Agrega listener para actualizar cuando cambie la estación
+document.getElementById("estacion").addEventListener("change", actualizarTiempoEstimado);
+
+// Actualiza cada 10 segundos automáticamente
+setInterval(actualizarTiempoEstimado, 10000);
+
+// Actualización inicial al cargar la página
+actualizarTiempoEstimado();
+function cargarUnidadesDesdeBackend(map) {
+  fetch('https://metrovia-backend.onrender.com/ubicacion')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Respuesta de red no OK');
+      }
+      return response.json();
+    })
     .then(data => {
+      console.log('Unidades recibidas:', data); // para depurar
       actualizarUnidades(map, data);
     })
     .catch(error => {
@@ -160,7 +220,6 @@ function cargarUnidadesDesdeBackend(map) {
      // Actualizar unidades cada 10 segundos
     setInterval(() => {
     cargarUnidadesDesdeBackend(map);
-    actualizarUnidades(map);
     }, 10000);
 }
 
