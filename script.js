@@ -5,7 +5,7 @@ const iconoEstacion = L.icon({
     popupAnchor: [0, -32] // dónde aparecerá el popup respecto al ícono
   });
 const iconoUnidad = L.icon({
-  iconUrl: 'img/bus.png', // pon aquí la ruta correcta a la imagen de la unidad
+  iconUrl: 'img/bus.png',
   iconSize: [32, 32],
   iconAnchor: [16, 32],
   popupAnchor: [0, -32]
@@ -125,7 +125,7 @@ function estimarTiempo(distanciaKm) {
 function actualizarTiempoEstimado() {
   const select = document.getElementById("estacion");
   const index = select.selectedIndex; // índice de la estación seleccionada
-  const coordsEstacion = estaciones[index]; // estaciones debe ser arreglo global
+  const coordsEstacion = estaciones[index];
 
   if (!coordsEstacion) return;
   fetch('https://metrovia-backend.onrender.com/ubicacion')
@@ -137,7 +137,6 @@ function actualizarTiempoEstimado() {
       }
 
       const tiempos = unidades.map(unidad => {
-        // Asegúrate de acceder a lat, lon correctamente
         const latUnidad = unidad.lat;
         const lonUnidad = unidad.lon;
 
