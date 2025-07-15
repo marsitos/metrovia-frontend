@@ -116,7 +116,43 @@ function calcularDistanciaKm(lat1, lon1, lat2, lon2) {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
+document.getElementById("cerrar-detalle").addEventListener("click", () => {
+  document.getElementById("detalle-estacion").style.display = "none";
+});
+document.getElementById("estacion").addEventListener("change", async (e) => {
+  const id = parseInt(e.target.value);
+  const estacion = estaciones[id];  // <- accede por índice
+  console.log("Estación seleccionada:", estacion);
 
+  if (!estacion) return;
+
+  document.getElementById("lat-estacion").innerText = estacion.lat;
+  document.getElementById("lon-estacion").innerText = estacion.lon;
+  document.getElementById("detalle-estacion").style.display = "block";
+
+  try {
+    const res = await fetch(`https://metrovia-backend.onrender.com/api/estacion/${id}/unidades`);
+    if (!res.ok) throw new Error("Error en la solicitud");
+
+    const unidades = await res.json();
+    const ul = document.getElementById("unidades-cercanas");
+    ul.innerHTML = "";
+
+    if (unidades.length === 0) {
+      ul.innerHTML = "<li>No hay unidades cercanas.</li>";
+      return;
+    }
+
+    unidades.forEach(unidad => {
+  const li = document.createElement("li");
+  li.innerText = `Unidad: ${unidad.idUnidad}`;
+  ul.appendChild(li);
+  });
+  } catch (error) {
+    console.error("Error al obtener unidades cercanas:", error);
+    document.getElementById("unidades-cercanas").innerHTML = "<li>Error al obtener unidades.</li>";
+  }
+});
 function estimarTiempo(distanciaKm) {
   const velocidadPromedioKmH = 25; // Aproximado para Metrovía
   const tiempoHoras = distanciaKm / velocidadPromedioKmH;

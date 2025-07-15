@@ -47,6 +47,14 @@
   <section id="info">
     <p>Tiempo estimado de llegada: <span id="tiempo">-</span> minutos</p>
   </section>
+    <section id="detalle-estacion" style="display: none; padding: 1em; background-color: #f0f0f0; border: 1px solid #ccc;">
+    <button id="cerrar-detalle" style="float: right;">✖</button>
+    <h3>Información de la estación</h3>
+    <p><strong>Latitud:</strong> <span id="lat-estacion"></span></p>
+    <p><strong>Longitud:</strong> <span id="lon-estacion"></span></p>
+    <h4>Unidades cercanas:</h4>
+    <ul id="unidades-cercanas"></ul>
+  </section>
   <div id="map" style="height: 100vh;"></div>
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="script.js"></script>
